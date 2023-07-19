@@ -3,6 +3,7 @@
   "description": "Best REST Porto Framework (BRPF)",
   "minimum-stability": "beta",
   "license": "proprietary",
+  "type": "project",
   "authors": [
     {
       "name": "m1n64",
@@ -14,8 +15,18 @@
     }
   ],
   "require": {
+    "vozim/core": "dev-main"
   },
   "autoload": {
     "App\\": "app/"
-  }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../rest-framework-core",
+      "options": {
+        "symlink": true
+      }
+    }
+  ]
 }
