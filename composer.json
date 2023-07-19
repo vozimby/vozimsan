@@ -1,0 +1,21 @@
+{
+  "name": "vozim/vozimsan",
+  "description": "Best REST Porto Framework (BRPF)",
+  "minimum-stability": "beta",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "m1n64",
+      "email": "mrcaxapov@gmail.com"
+    },
+    {
+      "name": "shedy2",
+      "email": "awesomeshedy@gmail.com"
+    }
+  ],
+  "require": {
+  },
+  "autoload": {
+    "App\\": "app/"
+  }
+}
