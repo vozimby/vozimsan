@@ -26,6 +26,9 @@ class GetAction extends AbstractBaseAction
         parent::__construct();
     }
 
+    /**
+     * @return Response
+     */
     public function __invoke(): Response
     {
         $books = $this->booksProvider->get();

@@ -5,15 +5,22 @@ namespace App\Containers\Books\Controllers;
 
 use App\Containers\Books\Actions\GetAction;
 use App\Containers\Books\Actions\PostAction;
-use Vozimsan\Core\Application\App;
+use App\Containers\Books\Middlewares\AuthMiddleware;
+use App\Containers\Books\Requests\HelloRequest;
+use Symfony\Component\HttpFoundation\Response;
 use Vozimsan\Core\Application\Controllers\AbstractBaseController;
 use Vozimsan\Core\Application\Http\Enums\HttpMethodEnums;
+use Vozimsan\Core\Application\Middlewares\Attributes\Middlewares;
+use Vozimsan\Core\Application\Requests\Attributes\FormRequest;
 use Vozimsan\Core\Application\Router\Attributes\Method;
 use Vozimsan\Core\Application\Router\Attributes\Route;
 
-#[Route('/book', name: "book_hello")]
+#[Route('/book')]
 class BookController extends AbstractBaseController
 {
+    /**
+     * @return string[]
+     */
     public function actions(): array
     {
         return [
@@ -23,8 +30,10 @@ class BookController extends AbstractBaseController
     }
 
     #[Method('/hello', [HttpMethodEnums::GET])]
-    public function hello()
+    #[Middlewares([AuthMiddleware::class])]
+    #[FormRequest(HelloRequest::class)]
+    public function hello(): Response
     {
-        echo "HI BROU!";
+        return $this->success(["greeting" => "{$this->request->greeting}, world!"]);
     }
 }
