@@ -1,0 +1,43 @@
+version: "3"
+services:
+  application:
+    build:
+      context: docker/app
+      dockerfile: Dockerfile
+      target: dev
+    environment:
+      XDEBUG_SESSION: "PHPSTORM"
+      XDEBUG_MODE: "debug"
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003 start_with_request=yes"
+      PHP_IDE_CONFIG: "serverName=crmmsk"
+    volumes:
+      - ./docker/app/php-dev.ini:/usr/local/etc/php/conf.d/php.ini
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  nginxserver:
+    ports:
+      - 80:80
+    command: [ "nginx", "-g", "daemon off;" ]
+
+  phpmyadminserver:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadminserver
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      PMA_ABSOLUTE_URI: /pma-admin/
+      TERM: "xterm"
+      TZ: "Europe/Moscow"
+    ports:
+      - "1337:1337"
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    command: apache2-foreground

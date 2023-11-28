@@ -1,0 +1,93 @@
+version: "3"
+services:
+  nginxserver:
+    build:
+      context:
+        docker/nginx
+    container_name: nginxserver
+    volumes:
+      - ./:/var/www/html:cached
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    restart: always
+    env_file: docker/nginx/.env
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      TERM: "xterm"
+      TZ: "Europe/Moscow"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    command: [ "nginx", "-g", "daemon off;" ]
+
+  application:
+    build:
+      context: docker/app
+      dockerfile: Dockerfile
+      target: base
+    container_name: application
+    volumes:
+      - ./:/var/www/html:cached
+      - ./docker/app/php-production.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./docker/app/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    depends_on:
+      - database
+      - redisserver
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    environment:
+      TERM: "xterm"
+      TZ: "Europe/Moscow"
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
+      DB_NAME: ${MYSQL_DATABASE:-projectdb}
+
+  database:
+    image: mariadb:10.2
+    container_name: database
+    volumes:
+      - ./db:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-projectdb}
+      - TZ=Europe/Moscow
+    restart: always
+    ports:
+      - "7153:3306"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    command: "$MYSQL_RUN_COMMAND"
+
+  redisserver:
+    container_name: redisserver
+    hostname: redis
+    image: redis:latest
+    volumes:
+      - ./redis:/data
+    restart: always
+
+  phpmyadminserver:
+    image: alpine:latest
+    container_name: pma
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    command: >
+      sh -c "while true; do echo -e 'HTTP/1.1 301 Moved Permanently\\nLocation: /\\n\\n' | nc -l -p 80; done"
